@@ -7,12 +7,14 @@ var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , request = require('request');
+  var server;
 
 var app = express();
 
 app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
+  app.set('port', 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
   app.use(express.favicon());
@@ -25,11 +27,20 @@ app.configure(function(){
 
 app.configure('development', function(){
   app.use(express.errorHandler());
+
+  // post data when server restart
 });
 
 app.get('/', routes.index);
+app.get('/monitor', routes.monitor);
+app.get('/list', routes.list);
 app.get('/users', user.list);
 
-http.createServer(app).listen(app.get('port'), function(){
+server = http.createServer(app);
+
+server.listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
+
+require('./io.server').init(server);
+
